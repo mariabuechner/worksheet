@@ -1,0 +1,304 @@
+#:kivy 1.11.1
+#:import np numpy
+#:import main main
+
+#:set num_input_size 0.3
+#:set default_font_size 18
+#:set line_height main.LINE_HEIGHT
+#:set menu_button_width 100
+#:set tab_height main.TAB_HEIGHT
+#:set dark_grey np.divide([88, 88, 88, 50],[255., 255., 255., 100.])
+#:set dark_red_button np.divide([255, 50, 50, 100],[255., 255., 255., 100.])
+#:set dark_red_menu np.divide([154, 31, 31, 100],[255., 255., 255., 100.])
+#:set darker_red_menu np.divide([128, 0, 0, 100],[255., 255., 255., 100.])
+
+# Global settings #############################################################
+
+# All buttons
+<Button>:
+    font_size: default_font_size
+    text_size: self.size
+    halign: 'center'
+    valign: 'center'
+    max_lines: 1
+    size_hint_y: None
+    height: line_height
+
+# All text inputs
+<TextInput>:
+    size_hint_y: None
+    height: line_height
+    size_hint_x: num_input_size
+    multiline: False  # On enter, loose focus on textinput
+    write_tab: False  # On tab, loose focus on textinput
+
+# All checkboxes
+<CheckBox>:
+    size_hint: (None, None)
+    height: line_height
+    width: line_height
+    canvas.before:
+        Color:
+            rgba: dark_grey
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+# All StackLayouts
+<StackLayout>:
+    padding: (2, 2, 2, 2 )
+
+# All NonFileBrowserLabel
+<NonFileBrowserLabel>:
+    font_size: default_font_size
+    text_size: self.size
+    halign: 'center'
+    valign: 'center'
+    max_lines: 1
+    size_hint_y: None
+    height: line_height
+    canvas.before:
+        Color:
+            rgba: dark_grey
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+# All  IntInputs cannot accept 0 values
+<IntInput>:
+    on_text: if self.text == '0': self.text = ''
+
+<ScrollableLabel>:
+    NonFileBrowserLabel:
+        font_size: default_font_size
+        max_lines: 0
+        size_hint_y: None
+        height: self.texture_size[1]
+        text_size: self.width, None
+        text: root.text
+        halign: 'left'
+        valign: 'top'
+        strip: True  #remove leading or trailing newlines or spaces
+
+
+# GUI definition ##############################################################
+
+<WorksheetGUI>:
+
+    # Titel
+    NonFileBrowserLabel:
+        size_hint_x: 1
+        bold: True
+        text: 'Worksheet Generator'
+        canvas.before:
+            Color:
+                rgba: dark_red_menu
+            Rectangle:
+                pos: self.pos
+                size: self.size
+    NonFileBrowserLabel:
+        size_hint_x: 1
+        size_hint_y: None
+        height: 5
+        text: ''
+        canvas.before:
+            Color:
+                rgba: (0,0,0,0)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+
+    # Date and user input
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_x: 1
+        size_hint_y: None
+        height: line_height
+
+        NonFileBrowserLabel:
+            halign: 'left'
+            size_hint_x: None
+            width: 80
+            text: 'Date:'
+            bold: True
+            canvas.before:
+                Color:
+                    rgba: darker_red_menu
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        NonFileBrowserLabel:
+            id: date
+            size_hint_x: None
+            width: 120
+            text: root.current_date
+            canvas.before:
+                Color:
+                    rgba: dark_grey
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        NonFileBrowserLabel:
+            halign: 'right'
+            size_hint_x: None
+            width: 80
+            text: 'Name:  '
+            bold: True
+            canvas.before:
+                Color:
+                    rgba: darker_red_menu
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        TextInput:
+            id: user
+            size_hint_x: None
+            width: 300
+            on_text: root.user_name = self.text
+        NonFileBrowserLabel:
+            text: ''
+            canvas.before:
+                Color:
+                    rgba: darker_red_menu
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        # Generate
+        Button:
+            id: generate_button
+            text: 'Generate worksheet'
+            background_color: dark_red_button
+            on_release: root.generate_worksheet()
+        # Save
+        Button:
+            id: save_button
+            text: 'Save...'
+            background_color: dark_red_button
+            on_release: pass
+
+    # Main Menu
+
+    StackLayout:
+        size_hint_x: 1
+
+        # Left side
+        StackLayout:
+            size_hint_x: 0.5
+
+            # Work focus
+            NonFileBrowserLabel:
+                size_hint_x: 1
+                halign: 'left'
+                text: 'Choose focus areas (for details click discription):'
+                canvas.before:
+                    Color:
+                        rgba: darker_red_menu
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            StackLayout:
+                size_hint_x: 0.95
+                LabelHelp:
+                    halign: 'left'
+                    text: 'Saving the world'
+                    help_message: 'Corona "research"'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                LabelHelp:
+                    halign: 'left'
+                    text: 'Developing cutting edge imaging techniques'
+                    help_message: 'Marginally improving current methods or copying from other groups'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                LabelHelp:
+                    halign: 'left'
+                    text: 'Software optimization'
+                    help_message: 'Googling how to code'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                LabelHelp:
+                    halign: 'left'
+                    text: 'Hardware improvement'
+                    help_message: 'Asking the technicians to do your work for you'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                LabelHelp:
+                    halign: 'left'
+                    text: 'Paper/conference preparation'
+                    help_message: 'Rewriting the same things all over again, hoping nobody will notice'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                LabelHelp:
+                    halign: 'left'
+                    text: 'Student supervision'
+                    help_message: 'Explaining basic gramma and science without actually shooting your students or yourself'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+            StackLayout:
+                size_hint_x: 0.05
+                CheckBox:
+                    id: corona
+                CheckBox:
+                    id: imaging
+                CheckBox:
+                    id: coding
+                CheckBox:
+                    id: hardware
+                CheckBox:
+                    id: paper
+                CheckBox:
+                    id: students
+
+
+        # Right side
+        StackLayout:
+            size_hint_x: 0.5
+
+            # Display worksheet
+            NonFileBrowserLabel:
+                size_hint_x: 1
+                size_hint_y: 1
+                halign: 'left'
+                valign: 'top'
+                max_lines: 0
+                text: root.current_worksheet
+                canvas.before:
+                    Color:
+                        rgba: dark_grey
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+
+
+
+
+
+
+
+

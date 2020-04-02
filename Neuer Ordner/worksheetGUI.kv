@@ -1,0 +1,181 @@
+#:kivy 1.11.1
+#:import np numpy
+#:import ntpath ntpath
+#:import main mainGUI
+
+#:set num_input_size 0.3
+#:set default_font_size 18
+#:set line_height main.LINE_HEIGHT
+#:set menu_button_width 100
+#:set tab_height main.TAB_HEIGHT
+#:set dark_grey np.divide([88, 88, 88, 50],[255., 255., 255., 100.])
+#:set dark_red_button np.divide([255, 50, 50, 100],[255., 255., 255., 100.])
+#:set dark_red_menu np.divide([154, 31, 31, 100],[255., 255., 255., 100.])
+#:set darker_red_menu np.divide([128, 0, 0, 100],[255., 255., 255., 100.])
+
+# All buttons
+<Button>:
+    font_size: default_font_size
+    text_size: self.size
+    halign: 'center'
+    valign: 'center'
+    max_lines: 1
+    size_hint_y: None
+    height: line_height
+
+# All text inputs
+<TextInput>:
+    size_hint_y: None
+    height: line_height
+    size_hint_x: num_input_size
+    multiline: False  # On enter, loose focus on textinput
+    write_tab: False  # On tab, loose focus on textinput
+
+# All checkboxes
+<CheckBox>:
+    size_hint: (None, None)
+    height: line_height
+    width: line_height
+    canvas.before:
+        Color:
+            rgba: dark_grey
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+# All BoxLayouts
+<BoxLayout>:
+    padding: (1, 1, 0, 0 )
+
+# Set rules for custom classes
+
+# All NonFileBrowserLabel
+<NonFileBrowserLabel>:
+    font_size: default_font_size
+    text_size: self.size
+    halign: 'center'
+    valign: 'center'
+    max_lines: 1
+    size_hint_y: None
+    height: line_height
+    canvas.before:
+        Color:
+            rgba: dark_grey
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+# All  IntInputs cannot accept 0 values
+<IntInput>:
+    on_text: if self.text == '0': self.text = ''
+
+
+# worksheet GUI
+<worksheetGUI>:
+    orientation: 'vertical'
+
+    # Main Menu
+    BoxLayout:
+        size_hint_y: None
+        height: line_height
+        canvas.before:
+            Color:
+                rgba: dark_red_menu
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        NonFileBrowserLabel:
+            size_hint_x: None
+            width: 180
+            bold: True
+            text: 'Worksheet Generator'
+            canvas.before:
+                Color:
+                    rgba: dark_red_menu
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        BoxLayout:
+            size_hint_x: None
+            width: 250
+            NonFileBrowserLabel:
+                text: 'Checkbox?'
+                canvas.before:
+                    Color:
+                        rgba: darker_red_menu
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            CheckBox:
+                disabled: not root.previous_results
+                id: show_previous_results
+                on_active: root.on_show_previous_results_active()
+                canvas:
+                    Clear:
+                    Color:
+                        rgba: darker_red_menu
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Rectangle:
+                        group: 'check_mark'
+                        source: 'atlas://data/images/defaulttheme/checkbox%s_%s' % (('_radio' if self.group else ''), ('on' if self.active else 'off'))
+                        size: self.size
+                        pos: self.pos
+        Button:
+            size_hint_x: None
+            width: 120
+            background_color: dark_red_button
+            text: 'Clear all'
+            on_release: root.reset_widgets()
+
+
+    # Splitter to seperate general input area (left) and Tabs for results
+    # and specific input (right)
+    BoxLayout:
+        Splitter:
+            sizable_from: 'right'
+            max_size: root.width*0.9
+            min_size: root.width*0.02
+
+
+            # Right side of splitter (splitters child widget)
+            BoxLayout:
+                orientation: 'vertical'
+                NonFileBrowserLabel:
+                    text: 'Right side'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                Button:
+                    size_hint_y: None
+                    text: 'Calculate geometry'
+
+                Button:
+                    size_hint_y: None
+                    text: 'Calculate analytical results'
+
+            # Left side of splitter
+            BoxLayout:
+                orientation: 'vertical'
+                    NonFileBrowserLabel:
+                    text: 'Right side'
+                    canvas.before:
+                        Color:
+                            rgba: darker_red_menu
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                Button:
+                    size_hint_y: None
+                    text: 'Calculate geometry'
+
+                Button:
+                    size_hint_y: None
+                    text: 'Calculate analytical results'
