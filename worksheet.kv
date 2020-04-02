@@ -1,6 +1,7 @@
 #:kivy 1.11.1
 #:import np numpy
 #:import main main
+#:import datetime datetime
 
 #:set num_input_size 0.3
 #:set default_font_size 18
@@ -153,29 +154,41 @@
                     size: self.size
         TextInput:
             id: user
-            size_hint_x: None
-            width: 300
+            size_hint_x: 0.25
             on_text: root.user_name = self.text
         NonFileBrowserLabel:
-            text: ''
+            halign: 'right'
+            size_hint_x: None
+            width: 200
+            text: 'Calendar week:  '
+            bold: True
             canvas.before:
                 Color:
                     rgba: darker_red_menu
                 Rectangle:
                     pos: self.pos
                     size: self.size
-        # Generate
-        Button:
-            id: generate_button
-            text: 'Generate worksheet'
-            background_color: dark_red_button
-            on_release: root.generate_worksheet()
-        # Save
-        Button:
-            id: save_button
-            text: 'Save...'
-            background_color: dark_red_button
-            on_release: pass
+        IntInput:
+            id: week
+            size_hint_x: None
+            width: 120
+            on_text: root.current_week = self.text
+        NonFileBrowserLabel:
+            halign: 'right'
+            size_hint_x: None
+            width: 100
+            text: 'Current?'
+            bold: True
+            canvas.before:
+                Color:
+                    rgba: darker_red_menu
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        CheckBox:
+            id: current_week
+            on_active: if self.active: week.text = str(datetime.date.today().isocalendar()[1])
+
 
     # Main Menu
 
@@ -262,25 +275,41 @@
             StackLayout:
                 size_hint_x: 0.05
                 CheckBox:
-                    id: corona
+                    id: fg_corona
                 CheckBox:
-                    id: imaging
+                    id: fg_imaging
                 CheckBox:
-                    id: coding
+                    id: fg_coding
                 CheckBox:
-                    id: hardware
+                    id: fg_hardware
                 CheckBox:
-                    id: paper
+                    id: fg_paper
                 CheckBox:
-                    id: students
+                    id: fg_students
 
 
         # Right side
         StackLayout:
             size_hint_x: 0.5
 
+            # Generate
+            Button:
+                id: generate_button
+                size_hint_x: 0.5
+                text: 'Generate worksheet'
+                background_color: dark_red_button
+                on_release: root.generate_worksheet()
+            # Save
+            Button:
+                id: save_button
+                size_hint_x: 0.5
+                text: 'Save...'
+                background_color: dark_red_button
+                on_release: root.save_worksheet()
+
             # Display worksheet
             NonFileBrowserLabel:
+                id: display_worksheet
                 size_hint_x: 1
                 size_hint_y: 1
                 halign: 'left'

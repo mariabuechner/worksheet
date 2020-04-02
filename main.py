@@ -10,12 +10,14 @@ python mainGUI.py [Option...]::
 @author: buechner_m  <maria.buechner@gmail.com>
 """
 import numpy as np
+import random
 from functools import partial
 import sys
 import re
 import os.path
 import datetime
 import logging
+import names # random names generator
 # Set kivy logger console output format
 formatter = logging.Formatter('%(asctime)s - %(name)s -    %(levelname)s - '
                               '%(message)s')
@@ -66,6 +68,59 @@ class ScrollableLabel(F.ScrollView):
     Label is scrolable in y direction. See .kv file for more information.
     """
     text = F.StringProperty('')
+
+# #############################################################################
+# Error and warning popups ####################################################
+
+
+class ErrorDisplay():
+    """
+    Popup window in case an exception is caught. Displays type of error and
+    error message.
+
+    Parameters
+    ==========
+
+    error_title [str]:      type of error
+    error_message [str]:    error message
+
+    """
+    def __init__(self, error_title, error_message):
+        """
+        Init _OKPopupWindow and open popup.
+        """
+        error_popup = _OKPopupWindow(error_title, error_message)
+        error_popup.popup.open()
+
+
+class WarningDisplay():
+    """
+    Popup window in case an exception is caught and user can choose to
+    continue. Displays type of warning and warning message.
+
+    Parameters
+    ==========
+
+    warning_title [str]:        type of warning
+    warning_message [str]:      warning message
+
+    overwrite [func]:           function to execute if 'continue'
+    overwrite_finish [func]:    after overwrite, finish up
+    cancel_finish [func]:       after cancel, finish up
+
+    """
+    def __init__(self, warning_title, warning_message,
+                 overwrite, overwrite_finish,
+                 cancel_finish):
+        """
+        Init _ContinueCancelPopupWindow and open popup.
+        """
+        self.warning_popup = _ContinueCancelPopupWindow(warning_title,
+                                                        warning_message,
+                                                        overwrite,
+                                                        overwrite_finish,
+                                                        cancel_finish)
+        self.warning_popup.popup.open()
 
 
 class LabelHelp(NonFileBrowserLabel):
@@ -288,6 +343,7 @@ class WorksheetGUI(F.StackLayout):
     # "Global kivy" variables (if kivy ..Property() sharable in .kv)
     # params[var_name] = value
     current_date = F.StringProperty()
+    current_week = F.StringProperty()
     user_name = F.StringProperty()
     current_worksheet = F.StringProperty()
 
@@ -300,14 +356,86 @@ class WorksheetGUI(F.StackLayout):
     # Wisgets reaction to change
     def generate_worksheet(self):
         """
-        On touch down a popup window is created, with its title indicating
-        the variable to which the help is referring and its help message.
+        Generate worksheet string
+
+        Format
+        ======
+
+        header:         Date, Name, calendar week
+        Tasks:          Randomly generated
 
         """
-        # Header (date, name)
+        # Header (date, name, week)
+        if not self.user_name:
+            self.ids.user.text = str(names.get_full_name())
+            warning_message = ("No user name entered, substituting {} ..."
+                               .format(self.user_name))
+            logger.warning(warning_message)
+            ErrorDisplay('Generating random name', warning_message)
+        if not self.current_week:
+            warning_message = ("Work week not selected, using current ...")
+            logger.warning(warning_message)
+            ErrorDisplay('Using current work week', warning_message)
+            self.ids.current_week.active = True
+        header = ("Date: {0}\nName: {1}\nWork week: {2}"
+                  .format(self.current_date, self.user_name,
+                          self.current_week))
+        # Tasks
+        tasks = 'Tasks:\n\n'
+        tasks = ("{0}{1}".format(tasks,self.generate_tasks()))
 
+        # Display
+        self.current_worksheet = '{0}\n\n{1}'.format(header, tasks)
+        self.ids.display_worksheet.text = self.current_worksheet
 
+    def save_worksheet(self):
+        """
+        Save worksheet string to file
 
+        """
+        if not self.current_worksheet:
+            error_message = ("Current worksheet is empty, please generate "
+                             "first.")
+            logger.error(error_message)
+            ErrorDisplay('Worksheet Error', error_message)
+        else:
+            pass
+
+    # Taks generaton
+    def generate_tasks(self):
+        """
+        Generate random tasks
+
+        Notes
+        =====
+
+        Random number of tasks between 4 and 10
+
+        """
+        taskfile = open("tasks.txt","r")
+        task_list = taskfile.read()
+        taskfile.close()
+        # get tasks for each focus group that has been selected
+        tasks = list()
+        for widget_id, widget in self.ids.iteritems():
+            if 'fg_' in widget_id and self.ids[widget_id].active:
+                current_tasks = task_list.split(widget_id+':')[1]
+                current_tasks = current_tasks.split('\n\nfg')[0]
+                current_tasks = current_tasks.splitlines()[1:]
+                number_of_tasks = np.random.randint(4, 10, 1)[0]
+                current_tasks = [current_tasks[i] for i in
+                                 random.sample(range(0, len(current_tasks)),
+                                               number_of_tasks)]
+                tasks.extend(current_tasks)
+        # If empty (nothing selected) ...
+        if tasks == []:
+            warning_message = ("No focus group selected, tasks list empty.")
+            logger.warning(warning_message)
+            ErrorDisplay('Please select focus group', warning_message)
+
+        # Convert to string
+        tasks = '\n'.join(tasks)
+        return tasks
 
 
 
